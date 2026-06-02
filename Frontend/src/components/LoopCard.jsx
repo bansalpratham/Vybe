@@ -1,6 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { FaVolumeHigh } from 'react-icons/fa6'
+import { FaHeart, FaRegHeart, FaVolumeHigh } from 'react-icons/fa6'
 import { IoMdVolumeOff } from 'react-icons/io'
+import dp from "../assets/dp.png"
+import FollowButton from './FollowButton'
+import { useDispatch, useSelector } from 'react-redux'
+import { MdOutlineComment } from "react-icons/md";
+import { setLoopData } from '../redux/loopSlice'
+import axios from 'axios'
+import { serverUrl } from '../App'
 
 function LoopCard({ loop }) {
   const videoRef = useRef(null)
@@ -8,6 +15,15 @@ function LoopCard({ loop }) {
   const [isPlaying, setIsPlaying] = useState(true)
   const [isMute, setIsMute] = useState(false)
   const [progress , setProgress] = useState(0)
+  const [showHeart , setShowHeart] = useState(false)
+  const [showComment , setShowComment] = useState(false)
+
+  const {userData} = useSelector(state=>state.user)
+  const {loopData} = useSelector(state=>state.loop)
+
+  const dispatch = useDispatch()
+
+  const commentRef = useRef()
 
   const handleTimeUpdate = ()=>{
     const video = videoRef.current
@@ -16,6 +32,12 @@ function LoopCard({ loop }) {
       const percent = (video.currentTime / video.duration) * 100
       setProgress(percent)
     }
+  }
+
+  const handleLikeOnDoubleClick = ()=>{
+    setShowHeart(true)
+    setTimeout(()=>setShowHeart(false),6000)
+    {!loop.likes?.includes(userData._id) ? handleLike():null}
   }
 
   const handleClick = () => {
@@ -41,6 +63,18 @@ function LoopCard({ loop }) {
 
     video.muted = !video.muted
     setIsMute(video.muted)
+  }
+
+  const handleLike = async()=>{
+    try {
+      const result = await axios.get(`${serverUrl}/api/loop/like/${loop._id}`,{withCredentials: true})
+      const updatedLoop = result.data
+
+      const updatedLoops = loopData.map(p=>p._id==loop._id?updatedLoop:p)
+      dispatch(setLoopData(updatedLoops))
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   useEffect(() => {
@@ -73,8 +107,17 @@ function LoopCard({ loop }) {
   }, [])
 
   return (
-    <div className="w-full h-screen flex justify-center items-center bg-black">
+    <div className="w-full h-screen flex justify-center items-center bg-black overflow-hidden">
       <div className="relative h-full aspect-9/16 border-l border-r border-gray-800 overflow-hidden bg-black">
+
+   {showHeart && <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 heart-animation z-50'>
+      <FaHeart className='w-25 cursor-pointer h-25 text-white drop-shadow-2xl' />
+    </div>}
+
+    <div ref={commentRef} className={`absolute z-200 bottom-0  w-full h-125 p-2.5 rounded-t-4xl bg-[#0e1718] transition-transform duration-500 ease-in-out left-0 shadow-2xl shadow-black ${showComment ? "translate-y-0" : "translate-y-full" } `}>
+        <h1 className='text-white text-[20px] text-center font-semibold'>Comments</h1>
+    </div>
+
         <video
           ref={videoRef}
           autoPlay
@@ -85,6 +128,7 @@ function LoopCard({ loop }) {
           onClick={handleClick}
           onTimeUpdate={handleTimeUpdate}
           className="w-full h-full object-contain cursor-pointer"
+          onDoubleClick={handleLikeOnDoubleClick}
         />
         <button
           onClick={handleMute}
@@ -102,10 +146,38 @@ function LoopCard({ loop }) {
           </div>
         </div>
 
-        <div className='w-full absolute h-25 bottom-2.5'>
+        <div className='w-full absolute h-25 bottom-2.5 p-2.5 flex flex-col gap-2.5 '>
+            <div className='flex items-center gap-1.25'>
+                 <div className='w-7.5 h-7.5 md:w-10 md:h-10 border-2 border-black rounded-full cursor-pointer overflow-hidden'>
+                        <img src={loop.author?.profileImage || dp} alt="" className='w-full object-cover' />
+                    </div>
+                    <div className='w-30 truncate text-white font-semibold '>{loop.author.userName}</div>
+            <FollowButton targetUserId={loop.author?._id}  tailwind={"px-[10px] py-[5px] text-white border-2 text-[14px] rounded-2xl border-white "} />
+                    </div>
+                    <div className='text-white px-2.5 '>
+                      {loop.caption}
+                    </div>
+
+          <div className='absolute right-0 flex flex-col gap-5 text-white bottom-37.5 justify-center px-2.5'>
+
+          <div className='flex flex-col items-center cursor-pointer'>
+            <div onClick={handleLike} >
+              {!loop.likes.includes(userData._id) && <FaRegHeart className='w-6.25 cursor-pointer h-6.25' />}
+              {loop.likes.includes(userData._id) && <FaHeart className='w-6.25 cursor-pointer h-6.25 text-red-600' />}
+            </div>
+            <div>
+              {loop.likes.length}
+            </div>
+          </div>
+
+          <div className='flex flex-col items-center cursor-pointer' onClick={()=>setShowComment(true)} >
+            <div><MdOutlineComment className='w-6.25 cursor-pointer h-6.25 ' /></div>
+            <div>{loop.comments.length}</div>
+          </div>
+
+          </div>
 
         </div>
-
       </div>
     </div>
   )
