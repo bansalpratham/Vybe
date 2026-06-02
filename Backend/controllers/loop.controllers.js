@@ -92,13 +92,18 @@ export const comment = async(req,res)=>{
     }
 }
 
-export const getAllLoops = async(req,res)=>{
-    try {
-        const loops = await Loop.find({}).populate("author","name username profileImage").populate("comments.author")
-        return res.status(200).json(loops)
-    } catch (error) {
-        return res.status(500).json({
-            message:`get all loop error ${error}`
-        })
-    }
+export const getAllLoops = async (req, res) => {
+  try {
+    const loops = await Loop.find({})
+      .populate("author", "name username profileImage")
+      .populate("comments.author");
+
+    return res.status(200).json(loops);
+  } catch (error) {
+    console.log(error); // ADD THIS
+
+    return res.status(500).json({
+      message: `get all loop error ${error}`
+    });
+  }
 }

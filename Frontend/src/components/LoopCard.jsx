@@ -13,7 +13,8 @@ function LoopCard({ loop }) {
     const video = videoRef.current
     if (video)
     {
-      const 
+      const percent = (video.currentTime / video.duration) * 100
+      setProgress(percent)
     }
   }
 
@@ -97,9 +98,12 @@ function LoopCard({ loop }) {
         </button>
 
         <div className='absolute bottom-0 w-full h-1.25 bg-gray-900'>
-          <div className='w-50 h-full bg-white '>
-
+          <div className='w-50 h-full bg-white transition-all duration-200 ease-linear' style={{width:`${progress}%`}} >
           </div>
+        </div>
+
+        <div className='w-full absolute h-25 bottom-2.5'>
+
         </div>
 
       </div>
