@@ -8,6 +8,7 @@ import { MdOutlineComment } from "react-icons/md";
 import { setLoopData } from '../redux/loopSlice'
 import axios from 'axios'
 import { serverUrl } from '../App'
+import { IoSend } from 'react-icons/io5'
 
 function LoopCard({ loop }) {
   const videoRef = useRef(null)
@@ -17,7 +18,7 @@ function LoopCard({ loop }) {
   const [progress , setProgress] = useState(0)
   const [showHeart , setShowHeart] = useState(false)
   const [showComment , setShowComment] = useState(false)
-
+  const [message,setMessage] = useState("")
   const {userData} = useSelector(state=>state.user)
   const {loopData} = useSelector(state=>state.loop)
 
@@ -34,15 +35,16 @@ function LoopCard({ loop }) {
     }
   }
 
+  
   const handleLikeOnDoubleClick = ()=>{
     setShowHeart(true)
     setTimeout(()=>setShowHeart(false),6000)
     {!loop.likes?.includes(userData._id) ? handleLike():null}
   }
-
+  
   const handleClick = () => {
     const video = videoRef.current
-
+    
     if (!video) return
 
     if (isPlaying) {
@@ -53,29 +55,61 @@ function LoopCard({ loop }) {
       setIsPlaying(true)
     }
   }
-
+  
   const handleMute = (e) => {
     e.stopPropagation()
-
+    
     const video = videoRef.current
-
+    
     if (!video) return
-
+    
     video.muted = !video.muted
     setIsMute(video.muted)
   }
-
+  
   const handleLike = async()=>{
     try {
       const result = await axios.get(`${serverUrl}/api/loop/like/${loop._id}`,{withCredentials: true})
       const updatedLoop = result.data
-
+      
       const updatedLoops = loopData.map(p=>p._id==loop._id?updatedLoop:p)
       dispatch(setLoopData(updatedLoops))
     } catch (error) {
       console.log(error)
     }
   }
+
+  const handleComment = async()=>{
+    try {
+      const result = await axios.post(`${serverUrl}/api/loop/comment/${loop._id}`,{message},{withCredentials: true})
+      const updatedLoop = result.data
+      
+      const updatedLoops = loopData.map(p=>p._id==loop._id?updatedLoop:p)
+      dispatch(setLoopData(updatedLoops))
+      setMessage("")
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  
+  useEffect(()=>{
+    const handleClickOutside =  (event)=>{
+      if (commentRef.current && !commentRef.current.contains(event.target))
+      {
+        setShowComment(false)
+      }
+    }
+
+    if (showComment)
+    {
+      document.addEventListener("mousedown",handleClickOutside)
+    }
+    else
+    {
+       document.removeEventListener("mousedown",handleClickOutside)
+    }
+
+  },[showComment])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -116,6 +150,29 @@ function LoopCard({ loop }) {
 
     <div ref={commentRef} className={`absolute z-200 bottom-0  w-full h-125 p-2.5 rounded-t-4xl bg-[#0e1718] transition-transform duration-500 ease-in-out left-0 shadow-2xl shadow-black ${showComment ? "translate-y-0" : "translate-y-full" } `}>
         <h1 className='text-white text-[20px] text-center font-semibold'>Comments</h1>
+        <div className='w-full h-87.5 overflow-y-auto flex flex-col gap-5'>
+          {loop.comments.length == 0 && <div className='text-center text-white text-[20px] font-semibold mt-12.5'>
+              No Comments Yet
+            </div>}
+          {loop.comments.map((com,index)=>(
+              <div className='w-full flex flex-col gap-1.25 border-b border-gray-800 justify-center pb-2.5 mt-2.5'>
+                    <div className='flex justify-start items-center md:gap-5 gap-2.5'>
+                         <div className='w-10 h-10 md:w-10 md:h-10 border-2 border-black rounded-full cursor-pointer overflow-hidden'>
+                                <img src={com.author?.profileImage || dp} alt="" className='w-full object-cover' />
+                            </div>
+                            <div className='w-37.5 font-semibold text-white truncate'>{com.author.userName}</div>
+                            </div>
+                    <div className='text-white pl-15'>{com.message}</div>        
+              </div>
+          ))}
+        </div>
+        <div className='w-full fixed bottom-0 h-20 flex items-center justify-between px-5 py-5 '>
+                <div className='w-10 h-10 md:w-15 md:h-15 border-2 border-black rounded-full cursor-pointer overflow-hidden'>
+                  <img src={loop.author?.profileImage || dp} alt="" className='w-full object-cover' />
+                </div> 
+                <input type="text" className='px-2.5 border-b-2 placeholder:text-white text-white border-b-gray-500 w-[90%] outline-none h-10' placeholder='Write Comment....' onChange={(e)=>setMessage(e.target.value)} value={message} />
+                {message && <button className='absolute right-5'><IoSend className='w-6.25 text-white h-6.25' onClick={(handleComment)} /></button>}
+                </div>
     </div>
 
         <video
