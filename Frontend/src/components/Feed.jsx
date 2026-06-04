@@ -8,6 +8,7 @@ import Post from './Post';
 
 function Feed() {
   const {postData} = useSelector(state=>state.post)
+  const {userData} = useSelector(state=>state.user)
   return (
     <div className='lg:w-[50%] w-full bg-black min-h-screen lg:h-screen relative lg:overflow-y-auto'>
      <div className='w-full h-25 flex items-center justify-between p-5 lg:hidden'>
@@ -17,16 +18,7 @@ function Feed() {
              </div>
            </div>
            <div className='flex w-full overflow-auto gap-2.5 items-center p-5'>
-            <StoryDp userName={"wdnwk"} />
-            <StoryDp userName={"wdnwk"} />
-            <StoryDp userName={"wdnwk"} />
-            <StoryDp userName={"wdnwk"} />
-            <StoryDp userName={"wdnwk"} />
-            <StoryDp userName={"wdnwk"} />
-            <StoryDp userName={"wdnwk"} />
-            <StoryDp userName={"wdnwk"} />
-            <StoryDp userName={"wdnwk"} />
-            <StoryDp userName={"wdnwk"} />
+            <StoryDp userName={"Your Story"}  ProfileImage={userData.ProfileImage} story={userData.story} />
            </div>
 
     <div className='w-full min-h-screen flex flex-col items-center gap-5 p-2.5 pt-10 bg-white rounded-t-[60px] relative pb-30'>
