@@ -14,12 +14,14 @@ import getAllPost from './hooks/getAllPost'
 import Loops from './Pages/Loops'
 import getAllLoops from './hooks/getAllLoops'
 import Story from './Pages/Story'
+import getAllStories from './hooks/getAllStories'
 export const serverUrl = "http://localhost:8000"
 function App() {
   getCurrentUser()
   getSuggestedUsers()
   getAllPost()
   getAllLoops()
+  getAllStories()
   const {userData} = useSelector(state=>state.user)
   return (
     <Routes>

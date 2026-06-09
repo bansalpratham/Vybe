@@ -3,10 +3,26 @@ import dp from "../assets/dp.png"
 import { CiCirclePlus } from "react-icons/ci";
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import axios from 'axios'
+import { serverUrl } from '../App';
 
 function StoryDp({ProfileImage,userName,story}) {
   const naviagte = useNavigate()
   const {userData} = useSelector(state=>state.user)
+
+  const handleViewers = async () => {
+  try {
+    const result = await axios.get(
+      `${serverUrl}/api/story/view/${story._id}`,
+      { withCredentials: true }
+    )
+
+    console.log(result.data)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
   const handleClick = ()=>{
     if (!story && userName == "Your Story") {
       naviagte("/upload")
@@ -14,7 +30,13 @@ function StoryDp({ProfileImage,userName,story}) {
     else
     {
       if (story && userName == "Your Story"){
+        handleViewers()
         naviagte(`/story/${userData.userName}`)
+      }
+      else
+      {
+        handleViewers()
+        naviagte(`/story/${userName}`)
       }
     }
   }
