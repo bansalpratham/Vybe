@@ -287,16 +287,12 @@ function Profile() {
             ))
         }
 
-        {postType === "saved" &&
-            userData?.saved?.map((post, index) => (
-
+        {postType === "saved" && postData?.filter(p => userData?.saved?.includes(p._id)).map((post, index) => (
                 <Post
                     key={post?._id || index}
                     post={post}
                 />
-
-            ))
-        }
+            ))}
 
     </>
 )}
