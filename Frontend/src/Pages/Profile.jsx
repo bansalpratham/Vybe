@@ -15,7 +15,7 @@ function Profile() {
     const { userName } = useParams()
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const [postType , setPostType] = useState("allPosts")
+    const [postType , setPostType] = useState("posts")
 
     const { profileData, userData } = useSelector(state => state.user)
     const { postData } = useSelector(state => state.post)

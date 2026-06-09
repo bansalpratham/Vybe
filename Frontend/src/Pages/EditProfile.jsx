@@ -46,7 +46,7 @@ function EditProfile() {
         dispatch(setProfileData(result.data))
         dispatch(setUserData(result.data))
         setLoading(false)
-        navigate(`/profile/${userData.userName}`)
+        navigate(`/profile/${result.data.userName}`)
       } catch (error) {
           console.log(error)
           setLoading(false)

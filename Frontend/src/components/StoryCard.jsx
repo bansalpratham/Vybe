@@ -3,6 +3,7 @@ import dp from "../assets/dp.png"
 import { useSelector } from 'react-redux'
 import { IoMdArrowBack } from 'react-icons/io'
 import { useNavigate } from 'react-router-dom'
+import { FaEye } from 'react-icons/fa'
 
 function StoryCard({storyData}) {
 
@@ -12,6 +13,7 @@ function StoryCard({storyData}) {
     const [progress,setProgress] = useState(0)
 
     useEffect(()=>{
+        if (!storyData) return
         const interval = setInterval(()=>{
             setProgress(prev=>{
                 if (prev>=100) {
@@ -23,7 +25,18 @@ function StoryCard({storyData}) {
             })
         },150)
         return ()=>clearInterval(interval)
-    },[navigate])
+    },[navigate, storyData])
+
+    if (!storyData) {
+        return (
+            <div className="w-full max-w-125 h-screen border-x-2 border-gray-800 pt-2.5 relative flex flex-col justify-center items-center bg-black text-white">
+                <div className="animate-pulse flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-gray-800"></div>
+                    <div className="h-4 w-24 bg-gray-800 rounded"></div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className='w-full max-w-125 h-screen border-x-2 border-gray-800 pt-2.5 relative flex flex-col justify-center'>
@@ -58,7 +71,7 @@ function StoryCard({storyData}) {
                                             {storyData?.viewers?.slice(0, 3).map((viewer, index) => (
                 
                                                 <div
-                                                    key={story?._id || index}
+                                                    key={viewer?._id || index}
                                                     style={{ left: `${index * 9}px` }}
                                                     className='w-10 h-10 border-2 border-black rounded-full cursor-pointer overflow-hidden absolute'
                                                 >

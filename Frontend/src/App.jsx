@@ -15,6 +15,9 @@ import Loops from './Pages/Loops'
 import getAllLoops from './hooks/getAllLoops'
 import Story from './Pages/Story'
 import getAllStories from './hooks/getAllStories'
+import Search from './Pages/Search'
+import Notifications from './Pages/Notifications'
+
 export const serverUrl = "http://localhost:8000"
 function App() {
   getCurrentUser()
@@ -30,10 +33,12 @@ function App() {
       <Route path='/' element={userData?<Home/>:<Navigate to={"/signin"} />} />
       <Route path='/forgot-password' element={!userData?<ForgotPassword/>:<Navigate to={"/"} />} />
       <Route path='/profile/:userName' element={userData?<Profile/>:<Navigate to={"/signin"} />} />
-    <Route path='/editprofile' element={userData?<EditProfile/>:<Navigate to={"/signin"} />} />
+      <Route path='/editprofile' element={userData?<EditProfile/>:<Navigate to={"/signin"} />} />
       <Route path='/upload' element={userData?<Upload/>:<Navigate to={"/signin"} />} />
-    <Route path='/loops' element={userData?<Loops/>:<Navigate to={"/signin"} />} />
-    <Route path='/story/:userName' element={userData?<Story/>:<Navigate to={"/signin"} />} />
+      <Route path='/loops' element={userData?<Loops/>:<Navigate to={"/signin"} />} />
+      <Route path='/story/:userName' element={userData?<Story/>:<Navigate to={"/signin"} />} />
+      <Route path='/search' element={userData?<Search/>:<Navigate to={"/signin"} />} />
+      <Route path='/notifications' element={userData?<Notifications/>:<Navigate to={"/signin"} />} />
     </Routes>
   )
 }

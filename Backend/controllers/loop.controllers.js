@@ -1,6 +1,7 @@
 import Loop from "../models/loop.model.js";
 import User from "../models/user.model.js";
 import uploadOnCloudinary from "../config/cloudinary.js";
+import { createNotification } from "./notification.controllers.js";
 
 export const uploadLoop = async(req,res)=>{
     try {
@@ -22,7 +23,7 @@ export const uploadLoop = async(req,res)=>{
         const user = await User.findById(req.userId)
         user.loops.push(loop._id)
         await user.save()
-        const populatedLoop = await Loop.findById(loop._id).populate("author","name username profileImage")
+        const populatedLoop = await Loop.findById(loop._id).populate("author","name userName profileImage")
         return res.status(201).json(populatedLoop)
     } catch (error) {
             return res.status(500).json({
@@ -49,9 +50,10 @@ export const like = async(req,res)=>{
          }
          else{
             loop.likes.push(req.userId)
+            await createNotification(req.userId, loop.author, "like", loop._id, true)
          }
          await loop.save()
-       await loop.populate("author","name username profileImage")
+       await loop.populate("author","name userName profileImage")
          return res.status(200).json(loop)
     } catch (error) {
         return res.status(500).json({
@@ -79,8 +81,9 @@ export const comment = async(req,res)=>{
         }) 
 
         await loop.save()
+        await createNotification(req.userId, loop.author, "comment", loop._id, true)
 
-       await loop.populate("author","name username profileImage"),
+       await loop.populate("author","name userName profileImage"),
        await loop.populate("comments.author")
         
           return res.status(200).json(loop)
@@ -95,7 +98,7 @@ export const comment = async(req,res)=>{
 export const getAllLoops = async (req, res) => {
   try {
     const loops = await Loop.find({})
-      .populate("author", "name username profileImage")
+      .populate("author", "name userName profileImage")
       .populate("comments.author");
 
     return res.status(200).json(loops);

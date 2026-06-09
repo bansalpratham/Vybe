@@ -31,13 +31,14 @@ function Upload() {
 
   const handleMedia = (e)=>{
       const file = e.target.files[0]
+      if (!file) return
       if (file.type.includes("image"))
       {
         setMediaType("image")
       }
       else
       {
-        setBackendMedia("video")
+        setMediaType("video")
       }
       setBackendMedia(file)
       setFrontendMedia(URL.createObjectURL(file))

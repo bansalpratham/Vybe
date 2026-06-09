@@ -1,6 +1,7 @@
 import uploadOnCloudinary from "../config/cloudinary.js";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
+import { createNotification } from "./notification.controllers.js";
 
 export const uploadPost = async(req,res)=>{
     try {
@@ -22,7 +23,7 @@ export const uploadPost = async(req,res)=>{
         const user = await User.findById(req.userId)
         user.posts.push(post._id)
         await user.save()
-        const populatedPost = await Post.findById(post._id).populate("author","name username profileImage")
+        const populatedPost = await Post.findById(post._id).populate("author","name userName profileImage")
         return res.status(201).json(populatedPost)
     } catch (error) {
             return res.status(500).json({
@@ -60,6 +61,7 @@ export const like = async(req,res)=>{
          }
          else{
             post.likes.push(req.userId)
+            await createNotification(req.userId, post.author, "like", post._id, false)
          }
          await post.save()
         await post.populate("author","name userName profileImage")
@@ -87,6 +89,7 @@ export const comment = async (req, res) => {
     });
 
     await post.save();
+    await createNotification(req.userId, post.author, "comment", post._id, false)
 
     await post.populate("author", "name userName profileImage");
     await post.populate("comments.author", "name userName profileImage");
@@ -116,7 +119,13 @@ export const saved = async(req,res)=>{
          }
 
          await user.save()
-         user.populate("saved")
+         await user.populate({
+             path: "saved",
+             populate: [
+                 { path: "author", select: "name userName profileImage" },
+                 { path: "comments.author", select: "name userName profileImage" }
+             ]
+         })
 
          return res.status(200).json(user)
     } catch (error) {

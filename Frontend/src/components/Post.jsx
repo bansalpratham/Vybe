@@ -138,7 +138,7 @@ function Post({post}) {
         <div className='w-full flex flex-col gap-7.5 pb-5'>
        <div className='w-full h-20 flex items-center justify-between px-5 relative'>
         <div className='w-10 h-10 md:w-15 md:h-15 border-2 border-black rounded-full cursor-pointer overflow-hidden'>
-          <img src={post.author?.profileImage || dp} alt="" className='w-full object-cover' />
+          <img src={userData.profileImage || dp} alt="" className='w-full object-cover' />
         </div> 
         <input type="text" className='px-2.5 border-b-2 border-b-gray-500 w-[90%] outline-none h-10' placeholder='Write Comment....' onChange={(e)=>setMessage(e.target.value)} value={message} />
         <button className='absolute right-5'><IoSend className='w-6.25 h-6.25' onClick={(handleComment)} /></button>

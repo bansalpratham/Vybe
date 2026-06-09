@@ -1,10 +1,20 @@
 import uploadOnCloudinary from "../config/cloudinary.js"
 import User from "../models/user.model.js"
+import bcrypt from "bcryptjs"
+import { createNotification } from "./notification.controllers.js"
 
 export const getCurrentUser = async(req,res)=>{
     try {
         const userId = req.userId
-        const user = await User.findById(userId).populate("posts loops posts.author posts.comments")
+        const user = await User.findById(userId)
+            .populate("posts loops posts.author posts.comments")
+            .populate({
+                path: "saved",
+                populate: [
+                    { path: "author", select: "name userName profileImage" },
+                    { path: "comments.author", select: "name userName profileImage" }
+                ]
+            })
 
         if (!user)
         {
@@ -38,7 +48,7 @@ export const suggestedUsers = async(req,res)=>{
 export const editProfile = async(req,res)=>{
     try {
         const {name,userName,bio,profession,gender} = req.body
-       const user = await User.findById(req.user._id).select("-password")
+       const user = await User.findById(req.userId).select("-password")
         if (!user)
         {
             return res.status(400).json({
@@ -49,7 +59,7 @@ export const editProfile = async(req,res)=>{
         const sameUserWithUserName = await User.findOne({userName}).select("-password")
        if (
   sameUserWithUserName &&
-  sameUserWithUserName._id.toString() !== req.user._id.toString()
+  sameUserWithUserName._id.toString() !== req.userId.toString()
 )
         {
             return res.status(400).json({
@@ -153,6 +163,8 @@ export const follow = async (req, res) => {
       await currentUser.save()
       await targetUser.save()
 
+      await createNotification(currentUserId, targetUserId, "follow")
+
       return res.status(200).json({
         following: true,
         message: "Followed successfully"
@@ -162,4 +174,59 @@ export const follow = async (req, res) => {
     console.log("Follow error:", error)
     return res.status(500).json({ message: `Follow error: ${error}` })
   }
+}
+
+export const searchUsers = async (req, res) => {
+    try {
+        const query = req.query.q
+        if (!query) {
+            return res.status(200).json([])
+        }
+
+        const users = await User.find({
+            $and: [
+                { _id: { $ne: req.userId } }, // Exclude self
+                {
+                    $or: [
+                        { name: { $regex: query, $options: "i" } },
+                        { userName: { $regex: query, $options: "i" } }
+                    ]
+                }
+            ]
+        }).select("name userName profileImage bio profession")
+
+        return res.status(200).json(users)
+    } catch (error) {
+        return res.status(500).json({
+            message: `search users error ${error}`
+        })
+    }
+}
+
+export const updatePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body
+        const user = await User.findById(req.userId)
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password)
+        if (!isMatch) {
+            return res.status(400).json({ message: "Incorrect current password" })
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: "New password must be at least 6 characters" })
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+        user.password = hashedPassword
+        await user.save()
+
+        return res.status(200).json({ message: "Password updated successfully" })
+    } catch (error) {
+        return res.status(500).json({ message: `Update password error: ${error}` })
+    }
 }

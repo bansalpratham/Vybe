@@ -5,9 +5,8 @@ import { serverUrl } from '../App'
 import { toggleFollow } from '../redux/userSlice'
 
 function FollowButton({ targetUserId, tailwind , onFollowChange }) {
-  const { userData } = useSelector(state => state.user)
-  const following = userData?.following || []
-  const isFollowing = following.includes(targetUserId)
+  const { userData, following } = useSelector(state => state.user)
+  const isFollowing = (following || []).includes(targetUserId)
 
   const dispatch = useDispatch()
 

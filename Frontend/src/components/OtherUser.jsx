@@ -8,17 +8,23 @@ function OtherUser({user}) {
     const {userData} = useSelector(state=>state.user)
     const navigate = useNavigate()
   return (
-    <div className='w-full h-20 flex items-center justify-between border-b-2 border-gray-800'>
-      <div className='flex items-center gap-2.5'>
-          <div className='w-12.5 h-12.5 border-2 border-black rounded-full cursor-pointer overflow-hidden' onClick={()=>navigate(`/profile/${user.userName}`)}>
-              <img src={user.profileImage || dp} alt="" className='w-full object-cover' />
+    <div className='w-full p-3 flex items-center justify-between rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all duration-300 group'>
+      <div className='flex items-center gap-3'>
+          <div 
+            className='w-11 h-11 rounded-full cursor-pointer overflow-hidden ring-1 ring-white/10 group-hover:ring-blue-400/50 transition-all duration-300' 
+            onClick={()=>navigate(`/profile/${user.userName}`)}
+          >
+              <img src={user.profileImage || dp} alt="" className='w-full h-full object-cover' />
           </div>
           <div>
-              <div className='text-[18px] text-white font-semibold'>{user.userName}</div>
-              <div className='text-[15px] text-gray-400 font-semibold '>{user.name}</div>
+              <div className='text-[15px] text-white font-semibold tracking-wide cursor-pointer hover:text-blue-400 transition-colors' onClick={()=>navigate(`/profile/${user.userName}`)}>{user.userName}</div>
+              <div className='text-[13px] text-gray-400 font-medium truncate max-w-28'>{user.name}</div>
           </div>
-          </div>
-          <FollowButton tailwind={'px-2.5 w-25 py-1.25 h-10 bg-[white] rounded-2xl'} targetUserId={user._id} />
+      </div>
+      <FollowButton 
+        tailwind={'px-3 py-1 text-[13px] font-semibold bg-white text-black rounded-full hover:bg-gray-200 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-md'} 
+        targetUserId={user._id} 
+      />
     </div>
   )
 }
